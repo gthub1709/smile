@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slider Emote</title>
+  <style>
+    *, *::after, *::before {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #ad3955;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ad3955;
+    }
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+    body {
+      background: #191919;
+      display: grid;
+      place-items: center;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .emote {
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 5rem;
+      width: fit-content;
+    }
+    .slider {
+      width: 15rem;
+      height: 1.5rem;
+      background: #333;
+      border-radius: 1.5rem;
+      box-shadow: 2px 2px 4px #111, inset 2px 2px 4px #666;
+      position: relative;
+    }
+    .knob {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: #AD3955;
+      box-shadow: 2px 2px 4px #3e000f, inset 2px 2px 4px #ed7894;
+      cursor: grab;
+      z-index: 1;
+    }
+    .range {
+      position: relative;
+      background: linear-gradient(-90deg, #AD3955, #AD3955, #F9F871, #AD3955, #AD3955);
+      background-size: 400% 100%;
+      background-repeat: no-repeat;
+      top: 0.15rem;
+      left: 0.15rem;
+      height: 1.2rem;
+      width: 0;
+      border-top-left-radius: 1.5rem;
+      border-bottom-left-radius: 1.5rem;
+      animation: gradient 1.5s linear infinite;
+      box-shadow: inset 0px 0px 5px #333;
+      transform: translateZ(1px);
+    }
+    @keyframes gradient {
+      from { background-position-x: 0%; }
+      to { background-position-x: 100%; }
+    }
+    .logo-wrapper {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      animation: fade-in 0.8s linear forwards;
+    }
+    @keyframes fade-in {
+      to { opacity: 1; }
+    }
+    .logo {
+      width: 3rem;
+      height: auto;
+      color: #fff;
+    }
+    .circle {
+      position: absolute;
+      width: 4rem;
+      height: 4rem;
+      top: 50%;
+      left: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      stroke-dasharray: 52;
+      stroke-dashoffset: 40;
+      animation: rotate 3s linear infinite;
+      filter: drop-shadow(0px 0px 6px #fff);
+    }
+    @keyframes rotate {
+      from { transform: translate3d(-50%, -50%, 0) rotate(0deg); }
+      to { transform: translate3d(-50%, -50%, 0) rotate(360deg); }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="emote">😐</div>
+    <div id="slider" class="slider">
+      <div class="knob"></div>
+      <div class="range"></div>
+    </div>
+  </div>
+
+  <div class="logo-wrapper">
+    <svg class="logo" xmlns="http://www.w3.org/2000/svg" id="logo" viewBox="0 0 119 90">
+      <style>
+        #logo {
+          overflow: visible;
+        }
+        #logo path:nth-child(2) { animation: logo-child-1 0.55s cubic-bezier(.23, 1.24, .8, 1.06); }
+        #logo path:nth-child(3) { animation: logo-child-2 0.55s cubic-bezier(.23, 1.24, .8, 1.06); }
+        #logo path:nth-child(4) { animation: logo-child-3 0.55s cubic-bezier(.23, 1.24, .8, 1.06); }
+        #logo path:nth-child(5) { animation: logo-child-4 0.55s cubic-bezier(.23, 1.24, .8, 1.06); }
+        #logo path:nth-child(6) { animation: logo-child-5 0.55s cubic-bezier(.23, 1.24, .8, 1.06); }
+        @keyframes logo-child-1 { from { transform: translateX(100%); } to { transform: translateY(0%); } }
+        @keyframes logo-child-2 { from { transform: translateY(-100%); } to { transform: translateY(0%); } }
+        @keyframes logo-child-3 { from { transform: translateY(100%) translateX(-100%); } to { transform: translateY(0%) translateX(0%); } }
+        @keyframes logo-child-4 { from { transform: translateY(100%); } to { transform: translateY(0%); } }
+        @keyframes logo-child-5 { from { transform: translateY(-100%); } to { transform: translateY(0%); } }
+      </style>
+      <!-- SVG paths (same as before) -->
+      <!-- ... (оставь свои пути SVG как есть, обрезал для краткости) -->
+    </svg>
+    <div class="circle">
+      <svg fill="none" viewBox="0 0 100 100">
+        <circle stroke="#fff" cx="50" cy="50" r="48" />
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    var emote = document.getElementsByClassName("emote")[0];
+    var draggables = Draggable.create(".knob", {
+      type: "x",
+      bounds: ".slider",
+      onDrag: update
+    });
+
+    function update() {
+      var x = draggables[0].x;
+      gsap.set(".range", { width: x });
+
+      var slider = document.getElementById("slider");
+      var sliderWidth = slider.getBoundingClientRect().width;
+      var perc = Math.ceil(100 / (sliderWidth - 32) * x);
+
+      if (perc === 100) {
+        emote.innerText = "😁";
+      } else if (perc > 75) {
+        emote.innerText = "😀";
+      } else if (perc > 50) {
+        emote.innerText = "😄";
+      } else if (perc > 25) {
+        emote.innerText = "🙂";
+      } else {
+        emote.innerText = "😐";
+      }
+    }
+  </script>
+</body>
+</html>
